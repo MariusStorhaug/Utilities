@@ -315,6 +315,72 @@ function ConvertTo-Boolean {
     }
 }
 
+<#
+.SYNOPSIS
+Removes empty folders under the folder specified
+
+.DESCRIPTION
+Long description
+
+.PARAMETER Path
+The path to the folder to be cleaned
+
+.EXAMPLE
+Remove-EmptyFolder -Path . -Verbose
+
+Removes empty folders under the current path and outputs the results to the console.
+
+#>
+Function Remove-EmptyFolder {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Path
+    )
+
+    Get-ChildItem -Path $Path -Recurse -Directory | ForEach-Object {
+        if ($null -eq (Get-ChildItem $_.FullName)) {
+            Write-Verbose "Removing empty folder: $_.FullName"
+            Remove-Item $_.FullName -Force
+        }
+    }
+}
+
+Function ConvertTo-Base64String {
+    param(
+        # Parameter help description
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName)]
+        [string]
+        $Text
+    )
+    $Bytes = [System.Text.Encoding]::Unicode.GetBytes($Text)
+    $EncodedText = [System.Convert]::ToBase64String($Bytes)
+
+    #$ADOToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($PAT)"))
+
+    return $EncodedText
+}
+
+Function ConvertFrom-Base64String {
+    [CmdletBinding()]
+    param (
+        [Parameter(
+            Mandatory,
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName)]
+        [string]
+        $Text
+    )
+    $ConvertedString = [System.Convert]::FromBase64String($Text)
+    $DecodedText = [System.Text.Encoding]::Unicode.GetString($ConvertedString)
+    return $DecodedText
+}
+
+
 function Get-MSGraphToken {
     [CmdletBinding()]
     param (
